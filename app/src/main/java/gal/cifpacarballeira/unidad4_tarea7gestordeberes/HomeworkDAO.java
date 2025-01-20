@@ -1,20 +1,31 @@
 package gal.cifpacarballeira.unidad4_tarea7gestordeberes;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.sql.Array;
 import java.util.ArrayList;
 
 public class HomeworkDAO {
     private SQLiteDatabase dbLectura;
     private SQLiteDatabase dbEscritura;
+    private static HomeworkDAO homeworkDAO;
+    @SuppressLint("StaticFieldLeak")
+    private static Context context;
 
-    public HomeworkDAO(Context context){
+    private HomeworkDAO(Context context){
+        this.context = context;
         dbLectura = new DataBaseHomework(context).getReadableDatabase();
         dbEscritura = new DataBaseHomework(context).getWritableDatabase();
+    }
+
+    public static HomeworkDAO obtenerInstancia(Context context){
+        if(homeworkDAO == null){
+            homeworkDAO = new HomeworkDAO(context);
+        }
+        return homeworkDAO;
     }
 
     public Integer obtenerId(){

@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        homeworkDAO = new HomeworkDAO(this);
+        homeworkDAO = HomeworkDAO.obtenerInstancia(getApplicationContext());
 
         // Inicialización de componentes
         recyclerView = findViewById(R.id.recyclerView);
