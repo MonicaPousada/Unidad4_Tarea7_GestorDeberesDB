@@ -27,7 +27,6 @@ public class Homework implements Parcelable {
         this.isCompleted = isCompleted;
     }
 
-    // Getters y Setters
     public String getSubject() {
         return subject;
     }
