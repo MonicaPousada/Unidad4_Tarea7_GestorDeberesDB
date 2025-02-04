@@ -11,6 +11,9 @@ import androidx.core.view.WindowInsetsCompat;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,8 +26,9 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private HomeworkAdapter adapter;
-    private List<Homework> homeworkList;
-    private HomeworkDAO homeworkDAO;
+    //private List<Homework> homeworkList;
+    private ListHomeworkViewModel homeworkList;
+    //private HomeworkDAO homeworkDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +41,22 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        homeworkDAO = HomeworkDAO.obtenerInstancia(getApplicationContext());
+        //homeworkDAO = HomeworkDAO.obtenerInstancia(getApplicationContext());
 
         // Inicialización de componentes
         recyclerView = findViewById(R.id.recyclerView);
         FloatingActionButton fab = findViewById(R.id.fab);
 //        homeworkList = new ArrayList<>();
-        homeworkList = homeworkDAO.readHomework();
+        homeworkList = new ViewModelProvider(this).get(ListHomeworkViewModel.class);
+        homeworkList.getLista().observe(this, new Observer<ArrayList<Homework>>() {
+            @Override
+            public void onChanged(ArrayList<Homework> homework) {
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         // Crear y configurar el adaptador
-        adapter = new HomeworkAdapter(homeworkList, homework -> showBottomSheet(homework));
+        adapter = new HomeworkAdapter(homeworkList.getLista().getValue(), homework -> showBottomSheet(homework));
 
         // Este código sería lo mismo que la anterior línea
         // adapter = new HomeworkAdapter(homeworkList, this::showBottomSheet);
@@ -74,13 +84,10 @@ public class MainActivity extends AppCompatActivity {
         }
         dialog.setOnHomeworkSavedListener(homework -> {
                     if (homeworkToEdit == null) {
-                        homeworkList.add(homework);
-                        homework.setId(homeworkDAO.insertHomework(homework));
+                        homeworkList.addHomework(homework);
                     } else {
-                        homeworkList.set(homeworkList.indexOf(homeworkToEdit), homework);
-                        homeworkDAO.updateHomework(homework);
+                        homeworkList.editHomework(homeworkToEdit, homework);
                     }
-            adapter.notifyDataSetChanged();
                 });
         dialog.show(getSupportFragmentManager(), "AddHomeworkDialog");
 //
@@ -121,9 +128,10 @@ public class MainActivity extends AppCompatActivity {
         // Opción de marcar como completada
         view.findViewById(R.id.completeOption).setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
-            homework.setCompleted(true);
-            homeworkDAO.updateHomework(homework);
-            adapter.notifyDataSetChanged();
+            //homework.setCompleted(true);
+            Homework homeworkTemporal = homework;
+            homeworkTemporal.setCompleted(true);
+            homeworkList.editHomework(homework, homeworkTemporal);
             Toast.makeText(this, "Tarea marcada como completada", Toast.LENGTH_SHORT).show();
         });
 
@@ -137,9 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Confirmar eliminación")
                 .setMessage("¿Estás seguro de que deseas eliminar este deber?")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
-                    homeworkList.remove(homework);
-                    homeworkDAO.deleteHomework(homework);
-                    adapter.notifyDataSetChanged();
+                    homeworkList.removeHomework(homework);
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
