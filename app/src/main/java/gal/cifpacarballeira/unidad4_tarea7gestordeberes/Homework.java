@@ -63,37 +63,41 @@ public class Homework implements Parcelable {
 
     public void setId(Integer id) { this.id = id; }
 
-    // Implementación de Parcelable
+    // Implementación de Parcelable para permitir que la tarea se pase entre actividades
+    // Constructor que recibe un objeto Parcel
     protected Homework(Parcel in) {
-        subject = in.readString();
-        description = in.readString();
-        dueDate = in.readString();
-        isCompleted = in.readByte() != 0;
+        subject = in.readString(); // Leer la asignatura desde el Parcel
+        description = in.readString(); // Leer la descripción desde el Parcel
+        dueDate = in.readString(); // Leer la fecha de entrega desde el Parcel
+        isCompleted = in.readByte() != 0; // Leer el estado de completado (convertido de byte)
     }
 
+    // CREATOR es necesario para poder crear objetos Homework a partir de un Parcel
     public static final Creator<Homework> CREATOR = new Creator<Homework>() {
         @Override
         public Homework createFromParcel(Parcel in) {
-            return new Homework(in);
+            return new Homework(in);// Crear un nuevo objeto Homework desde el Parcel
         }
 
         @Override
         public Homework[] newArray(int size) {
-            return new Homework[size];
+            return new Homework[size]; // Crear un arreglo de objetos Homework
         }
     };
 
+    // Método obligatorio para la interfaz Parcelable
     @Override
     public int describeContents() {
-        return 0;
+        return 0; // En este caso no se usa, por lo que devuelve 0
     }
 
+    // Método obligatorio para la interfaz Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(subject);
-        dest.writeString(description);
-        dest.writeString(dueDate);
-        dest.writeByte((byte) (isCompleted ? 1 : 0));
+        dest.writeString(subject); // Escribir la asignatura en el Parcel
+        dest.writeString(description); // Escribir la descripción en el Parcel
+        dest.writeString(dueDate); // Escribir la fecha de entrega en el Parcel
+        dest.writeByte((byte) (isCompleted ? 1 : 0)); // Escribir el estado de completado (convertido a byte)
     }
 }
 
